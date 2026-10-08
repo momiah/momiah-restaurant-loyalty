@@ -59,7 +59,7 @@ const Wrap = styled.View(({ theme }) => ({ flex: 1, backgroundColor: theme.color
 const Body = styled.ScrollView({ flex: 1 });
 const Head = styled.View({ alignItems: "center", paddingVertical: 10 });
 const Avatar = styled.View(({ theme }) => ({ width: 70, height: 70, borderRadius: 35, backgroundColor: theme.colors.brandDeep, alignItems: "center", justifyContent: "center" }));
-const AvatarTxt = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, fontSize: 26, fontWeight: "800" }));
+const AvatarTxt = styled.Text(({ theme }) => ({ color: theme.colors.onBrandDeep, fontSize: 26, fontWeight: "800" }));
 const AName = styled.Text(({ theme }) => ({ fontSize: 19, fontWeight: "800", color: theme.colors.text, marginTop: 8 }));
 const AMail = styled.Text(({ theme }) => ({ fontSize: 13, color: theme.colors.faint }));
 const Tier = styled.View(({ theme }) => ({ backgroundColor: theme.colors.brandSoft, borderRadius: 999, paddingVertical: 3, paddingHorizontal: 12, marginTop: 8 }));

@@ -1,21 +1,43 @@
-import React from "react";
-import styled from "styled-components/native";
+import React, { useEffect, useRef } from "react";
+import { Animated } from "react-native";
+import styled, { useTheme } from "styled-components/native";
 import { num } from "../lib/format";
 
-// Themed loyalty points card. Colour comes entirely from the restaurant theme.
+// Themed loyalty points card. Colour comes entirely from the restaurant theme, and the
+// text colour auto-adapts to the card background (onBrandDeep) so it's legible on any
+// brand. The progress bar animates from empty to the current level on mount.
 export default function PointsCard({ points = 0, next }) {
+  const theme = useTheme();
   const pct = next ? Math.min(100, Math.round((points / next.points) * 100)) : 100;
+
+  const progress = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: pct,
+      duration: 900,
+      useNativeDriver: false, // width can't use the native driver
+    }).start();
+  }, [pct, progress]);
+
+  const width = progress.interpolate({
+    inputRange: [0, 100],
+    outputRange: ["0%", "100%"],
+    extrapolate: "clamp",
+  });
+
+  const ink = theme.colors.onBrandDeep;
+
   return (
     <Card>
       <Glow />
-      <Label>Your points</Label>
-      <Value>
-        {num(points)} <Unit>pts</Unit>
+      <Label style={{ color: ink }}>Your points</Label>
+      <Value style={{ color: ink }}>
+        {num(points)} <Unit style={{ color: ink }}>pts</Unit>
       </Value>
       <Bar>
-        <Fill style={{ width: `${pct}%` }} />
+        <Animated.View style={{ width, height: "100%", borderRadius: 999, backgroundColor: ink }} />
       </Bar>
-      <Next>
+      <Next style={{ color: ink }}>
         {next ? `${num(next.points - points)} pts to ${next.label} 🎉` : "Top reward reached 🎉"}
       </Next>
     </Card>
@@ -25,33 +47,32 @@ export default function PointsCard({ points = 0, next }) {
 const Card = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.brandDeep,
   borderRadius: theme.radii.lg,
-  padding: 18,
+  padding: 24,
+  minHeight: 172,
+  justifyContent: "center",
   overflow: "hidden",
 }));
 const Glow = styled.View({
   position: "absolute",
-  right: -30,
-  top: -30,
-  width: 130,
-  height: 130,
-  borderRadius: 65,
+  right: -40,
+  top: -40,
+  width: 170,
+  height: 170,
+  borderRadius: 85,
   backgroundColor: "rgba(255,255,255,0.12)",
 });
-const Label = styled.Text(({ theme }) => ({
-  color: theme.colors.onBrand,
+const Label = styled.Text({
   opacity: 0.9,
-  fontSize: 12,
+  fontSize: 13,
   fontWeight: "700",
   letterSpacing: 1,
   textTransform: "uppercase",
-}));
-const Value = styled.Text(({ theme }) => ({
-  color: theme.colors.onBrand,
-  fontSize: 34,
+});
+const Value = styled.Text({
+  fontSize: 46,
   fontWeight: "800",
-  marginTop: 4,
-}));
-const Unit = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, fontSize: 15, fontWeight: "600", opacity: 0.85 }));
-const Bar = styled.View({ height: 7, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.25)", marginTop: 14, overflow: "hidden" });
-const Fill = styled.View(({ theme }) => ({ height: "100%", borderRadius: 999, backgroundColor: theme.colors.onBrand }));
-const Next = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, opacity: 0.92, fontSize: 12, fontWeight: "600", marginTop: 7 }));
+  marginTop: 8,
+});
+const Unit = styled.Text({ fontSize: 18, fontWeight: "600", opacity: 0.85 });
+const Bar = styled.View({ height: 9, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.25)", marginTop: 20, overflow: "hidden" });
+const Next = styled.Text({ opacity: 0.92, fontSize: 13, fontWeight: "600", marginTop: 10 });

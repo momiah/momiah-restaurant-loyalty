@@ -42,9 +42,9 @@ const Panel = styled.View(({ theme }) => ({
 }));
 const Logo = styled.View(({ theme }) => ({ width: 54, height: 54, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }));
 const LogoImg = styled.Image({ width: "100%", height: "100%" });
-const LogoTxt = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, fontSize: 24, fontWeight: "800" }));
-const Name = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, fontSize: 22, fontWeight: "800", marginTop: 12 }));
-const Pts = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, opacity: 0.9, marginTop: 2 }));
+const LogoTxt = styled.Text(({ theme }) => ({ color: theme.colors.onBrandDeep, fontSize: 24, fontWeight: "800" }));
+const Name = styled.Text(({ theme }) => ({ color: theme.colors.onBrandDeep, fontSize: 22, fontWeight: "800", marginTop: 12 }));
+const Pts = styled.Text(({ theme }) => ({ color: theme.colors.onBrandDeep, opacity: 0.9, marginTop: 2 }));
 const Nav = styled.View({ marginTop: 28 });
 const Item = styled.TouchableOpacity(({ active, disabled }) => ({
   flexDirection: "row",
@@ -55,7 +55,7 @@ const Item = styled.TouchableOpacity(({ active, disabled }) => ({
   backgroundColor: active ? "rgba(255,255,255,0.18)" : "transparent",
   opacity: disabled ? 0.6 : 1,
 }));
-const ItemTxt = styled.Text(({ theme, soon }) => ({ color: theme.colors.onBrand, fontSize: 16, fontWeight: soon ? "600" : "700" }));
-const Pill = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, marginLeft: "auto", fontSize: 10, backgroundColor: "rgba(255,255,255,0.25)", paddingVertical: 2, paddingHorizontal: 7, borderRadius: 6, overflow: "hidden" }));
+const ItemTxt = styled.Text(({ theme, soon }) => ({ color: theme.colors.onBrandDeep, fontSize: 16, fontWeight: soon ? "600" : "700" }));
+const Pill = styled.Text(({ theme }) => ({ color: theme.colors.onBrandDeep, marginLeft: "auto", fontSize: 10, backgroundColor: "rgba(255,255,255,0.25)", paddingVertical: 2, paddingHorizontal: 7, borderRadius: 6, overflow: "hidden" }));
 const SignOut = styled.TouchableOpacity({ marginTop: "auto", paddingVertical: 12, paddingHorizontal: 12 });
-const SignOutTxt = styled.Text(({ theme }) => ({ color: theme.colors.onBrand, opacity: 0.9, fontWeight: "700", fontSize: 15 }));
+const SignOutTxt = styled.Text(({ theme }) => ({ color: theme.colors.onBrandDeep, opacity: 0.9, fontWeight: "700", fontSize: 15 }));

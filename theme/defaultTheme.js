@@ -22,26 +22,33 @@ function shade(hex, amt) {
   if (!rgb) return hex;
   return toHex(rgb.map((c) => (amt < 0 ? c * (1 + amt) : c + (255 - c) * amt)));
 }
-// Readable text colour on a given background (black or white).
-function onColor(hex) {
+// Readable text colour for a given background. Uses perceived brightness (YIQ):
+// white text on mid-to-dark backgrounds, dark text only on genuinely light ones.
+// This is what makes the UI adapt per restaurant theme automatically — pass any
+// background colour and get a legible text colour back.
+export function onColor(hex) {
   const rgb = parse(hex);
   if (!rgb) return "#ffffff";
-  const [r, g, b] = rgb.map((c) => c / 255).map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
-  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return L > 0.5 ? "#17202A" : "#ffffff";
+  const [r, g, b] = rgb;
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000; // 0 (black) – 255 (white)
+  return brightness > 150 ? "#17202A" : "#ffffff";
 }
 
 export function buildTheme(restaurantTheme = {}) {
   const c = { ...FALLBACK, ...(restaurantTheme.colors || {}) };
   const primary = c.primary || FALLBACK.primary;
   const accent = c.accent || FALLBACK.accent;
+  const brandDeep = shade(primary, -0.22);
 
   return {
     colors: {
       primary,
-      brandDeep: shade(primary, -0.22),
+      brandDeep,
       brandSoft: shade(primary, 0.82),
+      // onBrand = readable on `primary` (buttons, chips); onBrandDeep = readable on
+      // `brandDeep` (points card, drawer, avatars). Computed per surface, not fixed.
       onBrand: onColor(primary),
+      onBrandDeep: onColor(brandDeep),
       accent,
       secondary: c.secondary || FALLBACK.secondary,
       // neutral surface palette (not usually overridden per restaurant)
