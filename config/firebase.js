@@ -2,7 +2,8 @@
 // owner dashboard and admin console use. Config from EXPO_PUBLIC_* env with fallbacks.
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { initializeAuth, getAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const env = process.env;
 
@@ -17,8 +18,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-// getAuth uses in-memory persistence on RN; swap to initializeAuth +
-// getReactNativePersistence(AsyncStorage) to persist sign-in across restarts.
-const auth = getAuth(app);
+
+// React Native needs AsyncStorage-backed auth persistence. Plain getAuth() pulls in
+// the web auth path, which references `document` and crashes Hermes at startup. Wrap
+// in try/catch so Fast Refresh (which re-runs this module) doesn't re-initialize auth.
+let auth;
+try {
+  auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+} catch (e) {
+  auth = getAuth(app);
+}
 
 export { app, db, auth };
