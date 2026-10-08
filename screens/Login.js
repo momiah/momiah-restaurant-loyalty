@@ -1,10 +1,18 @@
 import React, { useState } from "react";
-import { ActivityIndicator } from "react-native";
-import styled from "styled-components/native";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
+import styled, { useTheme } from "styled-components/native";
 import { useAuth } from "../context/AuthContext";
 import { useRestaurant } from "../context/RestaurantContext";
 
 export default function Login() {
+  const theme = useTheme();
   const { signIn, signUp } = useAuth();
   const { restaurant } = useRestaurant();
   const [mode, setMode] = useState("signin"); // signin | signup
@@ -28,35 +36,48 @@ export default function Login() {
   };
 
   return (
-    <Screen>
-      <Brand>
-        <Logo>{restaurant?.theme?.logoUrl ? <LogoImg source={{ uri: restaurant.theme.logoUrl }} /> : <LogoTxt>{(restaurant?.name || "R")[0]}</LogoTxt>}</Logo>
-        <BrandName>{restaurant?.name || "Loyalty"}</BrandName>
-        <Tagline>{mode === "signup" ? "Join the rewards club" : "Welcome back"}</Tagline>
-      </Brand>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: theme.colors.brandDeep }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 22 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <Inner>
+            <Brand>
+              <Logo>{restaurant?.theme?.logoUrl ? <LogoImg source={{ uri: restaurant.theme.logoUrl }} /> : <LogoTxt>{(restaurant?.name || "R")[0]}</LogoTxt>}</Logo>
+              <BrandName>{restaurant?.name || "Loyalty"}</BrandName>
+              <Tagline>{mode === "signup" ? "Join the rewards club" : "Welcome back"}</Tagline>
+            </Brand>
 
-      <Card>
-        {mode === "signup" && (
-          <Field><Label>Name</Label><Input value={name} onChangeText={setName} placeholder="Your name" autoCapitalize="words" /></Field>
-        )}
-        <Field><Label>Email</Label><Input value={email} onChangeText={setEmail} placeholder="you@email.com" autoCapitalize="none" keyboardType="email-address" /></Field>
-        <Field><Label>Password</Label><Input value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry /></Field>
+            <Card>
+              {mode === "signup" && (
+                <Field><Label>Name</Label><Input value={name} onChangeText={setName} placeholder="Your name" autoCapitalize="words" returnKeyType="next" /></Field>
+              )}
+              <Field><Label>Email</Label><Input value={email} onChangeText={setEmail} placeholder="you@email.com" autoCapitalize="none" keyboardType="email-address" autoCorrect={false} returnKeyType="next" /></Field>
+              <Field><Label>Password</Label><Input value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry returnKeyType="go" onSubmitEditing={submit} /></Field>
 
-        {err ? <ErrTxt>{err}</ErrTxt> : null}
+              {err ? <ErrTxt>{err}</ErrTxt> : null}
 
-        <Primary onPress={submit} disabled={busy}>
-          {busy ? <ActivityIndicator color="#fff" /> : <PrimaryTxt>{mode === "signup" ? "Create account" : "Sign in"}</PrimaryTxt>}
-        </Primary>
+              <Primary onPress={submit} disabled={busy}>
+                {busy ? <ActivityIndicator color="#fff" /> : <PrimaryTxt>{mode === "signup" ? "Create account" : "Sign in"}</PrimaryTxt>}
+              </Primary>
 
-        <Toggle onPress={() => { setErr(null); setMode(mode === "signup" ? "signin" : "signup"); }}>
-          <ToggleTxt>{mode === "signup" ? "Already a member? Sign in" : "New here? Create an account"}</ToggleTxt>
-        </Toggle>
-      </Card>
-    </Screen>
+              <Toggle onPress={() => { setErr(null); setMode(mode === "signup" ? "signin" : "signup"); }}>
+                <ToggleTxt>{mode === "signup" ? "Already a member? Sign in" : "New here? Create an account"}</ToggleTxt>
+              </Toggle>
+            </Card>
+          </Inner>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
-const Screen = styled.View(({ theme }) => ({ flex: 1, backgroundColor: theme.colors.brandDeep, alignItems: "center", justifyContent: "center", padding: 22 }));
+const Inner = styled.View({ alignItems: "center", width: "100%" });
 const Brand = styled.View({ alignItems: "center", marginBottom: 22 });
 const Logo = styled.View({ width: 66, height: 66, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" });
 const LogoImg = styled.Image({ width: "100%", height: "100%" });
