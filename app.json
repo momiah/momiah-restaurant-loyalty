@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Restaurant Loyalty",
+    "slug": "restaurant-loyalty",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": false },
+    "android": { "package": "app.menudock.loyalty" },
+    "web": { "bundler": "metro" },
+    "extra": {
+      "comment": "Set EXPO_PUBLIC_RESTAURANT_SLUG per client build to brand this app for one restaurant."
+    }
+  }
+}
