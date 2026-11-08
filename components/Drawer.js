@@ -2,7 +2,7 @@ import React from "react";
 import { Modal, Pressable } from "react-native";
 import styled from "styled-components/native";
 
-// Burger-menu drawer: the two Phase 1 destinations + a Phase 2 placeholder + sign out.
+// Burger-menu drawer: menu, orders, account, a Phase 2 placeholder and sign out.
 export default function Drawer({ open, onClose, current, onNavigate, restaurant, points, onSignOut }) {
   const name = restaurant?.name || "Restaurant";
   const initial = name[0] || "R";
@@ -19,6 +19,7 @@ export default function Drawer({ open, onClose, current, onNavigate, restaurant,
 
           <Nav>
             <Item active={current === "menu"} onPress={() => go("menu")}><ItemTxt active={current === "menu"}>Menu</ItemTxt></Item>
+            <Item active={current === "orders"} onPress={() => go("orders")}><ItemTxt active={current === "orders"}>My orders</ItemTxt></Item>
             <Item active={current === "account"} onPress={() => go("account")}><ItemTxt active={current === "account"}>My Account</ItemTxt></Item>
             <Item disabled><ItemTxt soon>Offers &amp; Deals</ItemTxt><Pill>Phase 2</Pill></Item>
           </Nav>
