@@ -2,6 +2,7 @@
 // owner dashboard and admin console use. Config from EXPO_PUBLIC_* env with fallbacks.
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
 import { initializeAuth, getAuth, getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -18,6 +19,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+// Cloud Functions (us-central1), e.g. claimLoyaltyPoints.
+const functions = getFunctions(app, "us-central1");
 
 // React Native needs AsyncStorage-backed auth persistence. Plain getAuth() pulls in
 // the web auth path, which references `document` and crashes Hermes at startup. Wrap
@@ -29,4 +32,4 @@ try {
   auth = getAuth(app);
 }
 
-export { app, db, auth };
+export { app, db, auth, functions };
