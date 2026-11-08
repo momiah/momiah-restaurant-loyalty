@@ -1,10 +1,13 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "../config/firebase";
+import VerifyEmailBanner from "../components/VerifyEmailBanner";
 import styled from "styled-components/native";
 import Header from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 import { useRestaurant } from "../context/RestaurantContext";
 import { num } from "../lib/format";
-import { REWARD_TIERS, nextReward } from "../lib/points";
+import { REWARD_TIERS, nextReward, pointsPerPound } from "../lib/points";
 
 export default function Account({ onMenu }) {
   const { user, profile, signOutUser } = useAuth();
@@ -14,6 +17,8 @@ export default function Account({ onMenu }) {
   const lifetime = profile?.lifetimePoints || 0;
   const next = useMemo(() => nextReward(points), [points]);
   const name = profile?.name || user?.displayName || "Member";
+  const history = usePointsHistory(restaurant?.id, user?.uid);
+  const rate = pointsPerPound(restaurant);
 
   return (
     <Wrap>
@@ -26,6 +31,7 @@ export default function Account({ onMenu }) {
           <Tier><TierTxt>{restaurant?.name || "Member"}</TierTxt></Tier>
         </Head>
 
+        <VerifyEmailBanner />
         <Balance>
           <BalVal>{num(points)} pts</BalVal>
           <BalSub>Lifetime: {num(lifetime)} pts</BalSub>
@@ -47,12 +53,48 @@ export default function Account({ onMenu }) {
           );
         })}
 
-        <Note>Redeeming &amp; the full points system arrive in Phase 2. Points earn at 1 per £1 for now.</Note>
+        <SecTitle>Points history</SecTitle>
+        {history.length === 0 ? (
+          <Empty>No points yet. Order in the app or on our website with {user?.email} to start earning.</Empty>
+        ) : (
+          history.map((h) => (
+            <HistRow key={h.id}>
+              <RMain>
+                <RName>{h.orderNumber ? `Order #${h.orderNumber}` : "Order"}</RName>
+                <RDesc>
+                  {h.createdAt?.toDate ? h.createdAt.toDate().toLocaleDateString("en-GB") : ""}
+                  {h.amount ? ` · £${Number(h.amount).toFixed(2)}` : ""}
+                </RDesc>
+              </RMain>
+              <HistPts>+{num(h.points)}</HistPts>
+            </HistRow>
+          ))
+        )}
+
+        <Note>
+          You earn {rate === 1 ? "1 point" : `${rate} points`} per £1 on every order, added once your payment is confirmed.
+          Redeeming rewards is coming soon.
+        </Note>
 
         <SignOut onPress={signOutUser}><SignOutTxt>Sign out</SignOutTxt></SignOut>
       </Body>
     </Wrap>
   );
+}
+
+// Latest earnings, newest first; written by the server, so read-only here.
+function usePointsHistory(restaurantId, uid) {
+  const [entries, setEntries] = useState([]);
+  useEffect(() => {
+    if (!restaurantId || !uid) return undefined;
+    const q = query(
+      collection(db, "restaurants", restaurantId, "customers", uid, "pointsHistory"),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+    return onSnapshot(q, (snap) => setEntries(snap.docs.map((d) => ({ id: d.id, ...d.data() }))), () => setEntries([]));
+  }, [restaurantId, uid]);
+  return entries;
 }
 
 const Wrap = styled.View(({ theme }) => ({ flex: 1, backgroundColor: theme.colors.bg }));
@@ -76,6 +118,9 @@ const RMain = styled.View({ flex: 1 });
 const RName = styled.Text(({ theme }) => ({ fontWeight: "700", fontSize: 14, color: theme.colors.text }));
 const RDesc = styled.Text(({ theme }) => ({ fontSize: 12, color: theme.colors.faint }));
 const RCta = styled.Text(({ theme, unlocked }) => ({ fontWeight: "800", fontSize: 12, color: unlocked ? theme.colors.primary : theme.colors.faint }));
+const HistRow = styled.View(({ theme }) => ({ flexDirection: "row", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: theme.colors.line }));
+const HistPts = styled.Text(({ theme }) => ({ fontWeight: "800", color: theme.colors.primary, fontSize: 15 }));
+const Empty = styled.Text(({ theme }) => ({ color: theme.colors.faint, fontSize: 13, marginTop: 4 }));
 const Note = styled.Text(({ theme }) => ({ fontSize: 12, color: theme.colors.faint, fontStyle: "italic", marginTop: 16 }));
 const SignOut = styled.TouchableOpacity({ marginTop: 20, alignItems: "center", paddingVertical: 12 });
 const SignOutTxt = styled.Text({ color: "#C0392B", fontWeight: "700" });
